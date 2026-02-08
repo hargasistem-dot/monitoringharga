@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kelola Barang</title>
+    <title>Kelola Barang Multi-Sheet</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -11,19 +11,18 @@
 
     <style>
         :root {
-            --primary-color: #2563eb; /* Biru Android Modern */
-            --bg-color: #f0f2f5;      /* Abu-abu lembut (Eye comfort) */
+            --primary-color: #2563eb;
+            --bg-color: #f0f2f5;
             --card-radius: 16px;
         }
 
         body {
             background-color: var(--bg-color);
             font-family: 'Inter', sans-serif;
-            padding-bottom: 90px; /* Ruang untuk tombol bawah */
+            padding-bottom: 90px;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Header Sticky mirip App Bar */
         .app-bar {
             background: white;
             position: sticky;
@@ -39,7 +38,6 @@
         .total-label { font-size: 0.75rem; color: #6c757d; font-weight: 600; text-transform: uppercase; }
         .total-value { font-size: 1.25rem; font-weight: 700; color: var(--primary-color); }
 
-        /* Card Style */
         .card-custom {
             background: white;
             border-radius: var(--card-radius);
@@ -54,7 +52,7 @@
             border: 1px solid #e9ecef;
             border-radius: 12px;
             padding: 12px;
-            font-size: 16px; /* Mencegah zoom otomatis di HP */
+            font-size: 16px;
         }
         .form-control:focus {
             box-shadow: none;
@@ -62,11 +60,8 @@
             background-color: white;
         }
 
-        /* List Item Style (Pengganti Tabel) */
-        .item-list {
-            padding: 0;
-            list-style: none;
-        }
+        /* List Style */
+        .item-list { padding: 0; list-style: none; }
         .item-row {
             padding: 12px 15px;
             border-bottom: 1px solid #f0f0f0;
@@ -79,47 +74,31 @@
         .item-meta { font-size: 0.75rem; color: #888; }
         .item-price { font-weight: 700; color: var(--primary-color); font-size: 1rem; }
 
-        /* Bottom Floating Bar */
         .bottom-bar {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            bottom: 0; left: 0; width: 100%;
             background: white;
             padding: 12px 20px;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
             z-index: 1000;
-            display: flex;
-            gap: 10px;
+            display: flex; gap: 10px;
         }
 
         .btn-main {
-            border-radius: 12px;
-            font-weight: 600;
-            padding: 12px;
-            font-size: 1rem;
-            flex: 1;
+            border-radius: 12px; font-weight: 600; padding: 12px; font-size: 1rem; flex: 1;
         }
 
-        /* Settings Accordion */
         .settings-toggle {
-            font-size: 0.85rem;
-            color: #6c757d;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 10px;
+            font-size: 0.85rem; color: #6c757d; text-decoration: none;
+            display: inline-block; margin-bottom: 10px;
+            background: #e9ecef; padding: 5px 12px; border-radius: 20px;
         }
 
-        /* Overlay Loading */
         .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.95);
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            z-index: 2000; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
             text-align: center;
         }
     </style>
@@ -139,30 +118,43 @@
     <div class="container mt-3 px-3">
         
         <div id="viewInput">
-            <div class="text-end">
+            <div class="d-flex justify-content-end mb-2">
                 <a href="#" onclick="toggleSettings()" class="settings-toggle">
-                    <i class="fas fa-cog me-1"></i> Atur Link Script
+                    <i class="fas fa-sliders-h me-1"></i> Pengaturan
                 </a>
             </div>
             
-            <div class="card-custom p-3" id="settingsCard" style="display:none;">
-                <label class="small fw-bold mb-1 text-muted">URL Apps Script</label>
-                <input type="text" id="scriptUrl" class="form-control mb-1" placeholder="Paste Link Script di sini...">
-                <small class="text-danger" style="font-size: 0.7rem;">*Hanya perlu diisi sekali.</small>
+            <div class="card-custom p-3 border border-primary bg-primary bg-opacity-10" id="settingsCard" style="display:none;">
+                <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-cog me-2"></i>Konfigurasi</h6>
+                
+                <div class="mb-3">
+                    <label class="small fw-bold mb-1 text-muted">URL Apps Script</label>
+                    <input type="text" id="scriptUrl" class="form-control form-control-sm bg-white" placeholder="https://script.google.com/macros/s/...">
+                </div>
+
+                <div class="mb-1">
+                    <label class="small fw-bold mb-1 text-muted">Simpan ke Nama Sheet/Tab:</label>
+                    <input type="text" id="sheetName" class="form-control fw-bold text-primary bg-white" value="Sheet1" placeholder="Contoh: Rokok, Maret 2026">
+                    <small class="text-muted" style="font-size: 0.7rem;">*Jika nama sheet belum ada, otomatis dibuatkan.</small>
+                </div>
             </div>
 
             <div class="card-custom p-3">
                 <label class="fw-bold mb-2 text-dark"><i class="fas fa-paste me-2 text-primary"></i>Paste Data Excel</label>
-                <textarea id="inputData" class="form-control" rows="10" placeholder="Tekan lama di sini lalu Paste data Anda..."></textarea>
+                <textarea id="inputData" class="form-control" rows="10" placeholder="Tekan lama di sini lalu Paste data..."></textarea>
             </div>
             
-            <div class="alert alert-info py-2 small border-0 bg-white shadow-sm" style="border-radius: 10px;">
-                <i class="fas fa-info-circle me-1"></i> 
-                Web ini akan menghitung total. Excel hanya menyimpan data.
+            <div class="alert alert-light py-2 small border bg-white shadow-sm" style="border-radius: 10px;">
+                <i class="fas fa-info-circle me-1 text-info"></i> 
+                Pastikan nama Sheet di pengaturan sudah benar sebelum kirim.
             </div>
         </div>
 
         <div id="viewPreview" style="display: none;">
+            <div class="alert alert-primary py-2 px-3 small d-flex justify-content-between align-items-center mb-2" style="border-radius: 10px;">
+                <span><i class="fas fa-folder me-1"></i> Target: <strong id="previewSheetName">Sheet1</strong></span>
+            </div>
+
             <div class="card-custom">
                 <div class="p-3 border-bottom bg-light d-flex justify-content-between">
                     <span class="fw-bold">Rincian Barang</span>
@@ -170,8 +162,7 @@
                         <i class="fas fa-edit me-1"></i> Edit
                     </button>
                 </div>
-                <div id="itemsContainer">
-                    </div>
+                <div id="itemsContainer"></div>
             </div>
         </div>
 
@@ -195,16 +186,23 @@
     <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
         <h4 class="fw-bold">Mengirim Data...</h4>
-        <p class="text-muted small px-4">Mohon tunggu, jangan tutup browser.</p>
+        <p class="text-muted small px-4" id="loadingText">Mohon tunggu...</p>
     </div>
 
     <script>
         let parsedData = [];
 
-        // Load URL Script saat dibuka
         window.onload = function() {
+            // Load URL Script
             const savedUrl = localStorage.getItem('myScriptUrl');
             if(savedUrl) document.getElementById('scriptUrl').value = savedUrl;
+            
+            // Load Last Sheet Name (biar ga ngetik ulang terus)
+            const savedSheet = localStorage.getItem('mySheetName');
+            if(savedSheet) document.getElementById('sheetName').value = savedSheet;
+
+            // Buka setting otomatis jika URL kosong
+            if(!savedUrl) document.getElementById('settingsCard').style.display = 'block';
         }
 
         function toggleSettings() {
@@ -212,12 +210,13 @@
             el.style.display = el.style.display === 'none' ? 'block' : 'none';
         }
 
-        // Tahap 1: Parsing & Preview
         function processPreview() {
             const rawData = document.getElementById('inputData').value.trim();
+            const sheetName = document.getElementById('sheetName').value.trim();
             const container = document.getElementById('itemsContainer');
             
             if (!rawData) return alert("Data kosong! Silakan Paste dulu.");
+            if (!sheetName) return alert("Nama Sheet tidak boleh kosong! Cek Pengaturan.");
 
             parsedData = [];
             container.innerHTML = "";
@@ -225,7 +224,6 @@
 
             const lines = rawData.split('\n');
             lines.forEach(line => {
-                // Logic Split Tab / Regex
                 let parts = line.split('\t');
                 if (parts.length < 3) {
                     const regex = /^(.*?)\s+(\d+(?:[.,]\d+)?)$/;
@@ -248,7 +246,6 @@
                         parsedData.push(item);
                         total += harga;
 
-                        // Render Item sebagai List (Card) bukan Tabel
                         const itemHtml = `
                             <div class="item-row">
                                 <div>
@@ -265,23 +262,23 @@
 
             if(parsedData.length === 0) return alert("Format data tidak dikenali.");
 
-            // Update UI Header
+            // Update UI
             document.getElementById('headerTotal').innerText = formatRupiah(total);
             document.getElementById('itemCount').innerText = parsedData.length + " Item";
+            document.getElementById('previewSheetName').innerText = sheetName;
 
-            // Ganti Tampilan ke Mode Preview
+            // Simpan preferensi nama sheet
+            localStorage.setItem('mySheetName', sheetName);
+
+            // Switch View
             document.getElementById('viewInput').style.display = 'none';
             document.getElementById('viewPreview').style.display = 'block';
-            
-            // Ganti Tombol Bawah
             document.getElementById('btnPreview').style.display = 'none';
             document.getElementById('actionButtons').style.setProperty('display', 'flex', 'important');
             
-            // Scroll ke atas
             window.scrollTo(0,0);
         }
 
-        // Kembali ke Edit
         function backToInput() {
             document.getElementById('viewInput').style.display = 'block';
             document.getElementById('viewPreview').style.display = 'none';
@@ -289,25 +286,36 @@
             document.getElementById('actionButtons').style.setProperty('display', 'none', 'important');
         }
 
-        // Tahap 2: Upload
         function uploadData() {
             const scriptUrl = document.getElementById('scriptUrl').value.trim();
-            if(!scriptUrl) return alert("Mohon isi URL Apps Script di pengaturan (ikon gerigi)!");
+            const sheetName = document.getElementById('sheetName').value.trim();
+
+            if(!scriptUrl) return alert("Mohon isi URL Apps Script di pengaturan!");
 
             localStorage.setItem('myScriptUrl', scriptUrl);
+            
+            // Siapkan Overlay
+            document.getElementById('loadingText').innerText = `Mengirim ke sheet: "${sheetName}"...`;
             document.getElementById('loadingOverlay').style.display = 'flex';
+
+            // BUNGKUS DATA (Payload)
+            // Kita kirim object yang berisi Nama Sheet dan Array Data
+            const payload = {
+                targetSheet: sheetName,
+                items: parsedData
+            };
 
             fetch(scriptUrl, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(parsedData)
+                body: JSON.stringify(payload)
             })
             .then(() => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                alert("BERHASIL! Data terkirim ke Google Sheet.");
+                alert(`BERHASIL! Data terkirim ke sheet "${sheetName}".`);
                 
-                // Reset Semua
+                // Reset
                 document.getElementById('inputData').value = "";
                 document.getElementById('headerTotal').innerText = "Rp 0";
                 document.getElementById('itemCount').innerText = "0 Item";
@@ -315,7 +323,7 @@
             })
             .catch(err => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                alert("Gagal kirim. Cek internet/URL Script.");
+                alert("Gagal kirim. Cek internet atau URL Script.");
             });
         }
 
