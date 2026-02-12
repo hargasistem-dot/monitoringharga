@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Input Kode & Edit Nama</title>
+    <title>Edit Nama & Harga</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,32 +20,33 @@
         .total-value { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
         .card-custom { background: white; border-radius: 12px; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 12px; }
         
-        /* Layout Item Row yang baru */
+        /* Layout Item Row Baru */
         .item-row { 
             padding: 12px; border-bottom: 1px solid #f0f0f0; 
-            display: flex; gap: 10px; align-items: flex-start; 
+            display: flex; flex-direction: column; gap: 8px;
         }
         
-        /* Kolom Kode (Kiri) */
-        .col-code { width: 60px; flex-shrink: 0; }
-        .input-kode {
-            width: 100%; text-align: center; font-weight: bold; font-size: 16px;
-            border: 2px solid #e9ecef; border-radius: 8px; padding: 8px 2px;
-            color: var(--primary); background: #f8f9fa;
-        }
-        .input-kode:focus { border-color: var(--primary); background: white; outline: none; }
-
-        /* Kolom Nama & Harga (Tengah) */
-        .col-detail { flex-grow: 1; }
+        /* Input Nama */
         .input-nama {
             width: 100%; border: none; border-bottom: 1px dashed #ccc;
-            font-weight: 600; color: #333; font-size: 0.95rem; padding: 2px 0;
-            border-radius: 0; background: transparent; margin-bottom: 4px;
+            font-weight: 600; color: #333; font-size: 1rem; padding: 4px 0;
+            border-radius: 0; background: transparent;
         }
         .input-nama:focus { border-bottom: 1px solid var(--primary); outline: none; }
         
-        .static-info { font-size: 0.8rem; color: #666; display: flex; justify-content: space-between; }
-        .price-tag { font-weight: bold; color: #198754; }
+        /* Baris Bawah (Tanggal & Harga Input) */
+        .row-detail { display: flex; justify-content: space-between; align-items: center; }
+        .tgl-badge { font-size: 0.8rem; color: #666; background: #f8f9fa; padding: 2px 8px; border-radius: 4px; }
+        
+        .input-harga-wrapper { 
+            display: flex; align-items: center; background: #eef2ff; 
+            padding: 4px 10px; border-radius: 8px; width: 140px;
+        }
+        .currency-symbol { font-size: 0.8rem; color: var(--primary); font-weight: bold; margin-right: 4px; }
+        .input-harga {
+            width: 100%; border: none; background: transparent; text-align: right;
+            font-weight: bold; color: var(--primary); outline: none; font-size: 0.95rem;
+        }
 
         .bottom-bar {
             position: fixed; bottom: 0; left: 0; width: 100%; background: white;
@@ -86,13 +87,13 @@
                 <textarea id="inputData" class="form-control" rows="10" placeholder="Tanggal [Tab] Nama [Tab] Harga..."></textarea>
             </div>
             <div class="alert alert-info py-2 small border-0 shadow-sm">
-                <i class="fas fa-info-circle me-2"></i> Paste data dulu, nanti Anda bisa isi <b>Kode</b> dan <b>Edit Nama</b> di halaman selanjutnya.
+                <i class="fas fa-edit me-2"></i> Anda dapat mengedit <b>Nama Barang</b> dan <b>Harga</b> setelah menekan tombol Cek.
             </div>
         </div>
 
         <div id="viewPreview" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-2 px-1">
-                <strong class="small text-muted">Lengkapi Data:</strong>
+                <strong class="small text-muted">Periksa Data:</strong>
                 <span class="badge bg-primary rounded-pill" id="itemCount">0 Item</span>
             </div>
             <div id="itemsContainer" class="card-custom"></div>
@@ -101,7 +102,7 @@
 
     <div class="bottom-bar">
         <button onclick="processData()" id="btnProcess" class="btn btn-primary btn-main shadow-sm">
-            <i class="fas fa-edit me-2"></i> Proses Edit & Kode
+            <i class="fas fa-search me-2"></i> Cek & Edit
         </button>
 
         <div id="actionButtons" class="w-100 d-flex gap-2" style="display: none !important;">
@@ -142,7 +143,7 @@
             lines.forEach((line, index) => {
                 let parts = line.split('\t');
                 
-                // Logic Regex jika user copy manual (spasi)
+                // Regex fallback jika paste manual
                 if (parts.length < 3) {
                     const match = line.match(/^(.*?)\s+(\d+(?:[.,]\d+)?)$/);
                     if (match) {
@@ -154,31 +155,29 @@
 
                 if (parts.length >= 3) {
                     const tgl = parts[0].trim();
-                    const nama = parts[1].trim(); // Nama Awal
+                    const nama = parts[1].trim(); 
                     const harga = parseInt(parts[parts.length - 1].replace(/[^0-9]/g, ''));
 
                     if (!isNaN(harga)) {
-                        const item = { id: index, tgl, nama, harga, kode: "" }; // Default kode kosong
+                        const item = { id: index, tgl, nama, harga };
                         parsedData.push(item);
                         total += harga;
 
-                        // RENDER INPUT EDITABLE
+                        // RENDER INPUT: Nama & Harga bisa diedit
                         const html = `
                             <div class="item-row">
-                                <div class="col-code">
-                                    <input type="text" inputmode="text" class="input-kode" 
-                                        placeholder="00" 
-                                        onchange="updateItem(${index}, 'kode', this.value)">
-                                    <div style="font-size:10px; text-align:center; color:#999; margin-top:2px;">KODE</div>
-                                </div>
-                                <div class="col-detail">
-                                    <input type="text" class="input-nama" 
-                                        value="${nama}" 
-                                        onchange="updateItem(${index}, 'nama', this.value)">
+                                <input type="text" class="input-nama" 
+                                    value="${nama}" placeholder="Nama Barang"
+                                    onchange="updateItem(${index}, 'nama', this.value)">
+                                
+                                <div class="row-detail">
+                                    <span class="tgl-badge"><i class="far fa-calendar-alt me-1"></i> ${tgl}</span>
                                     
-                                    <div class="static-info">
-                                        <span><i class="far fa-calendar-alt me-1"></i> ${tgl}</span>
-                                        <span class="price-tag">${formatRupiah(harga)}</span>
+                                    <div class="input-harga-wrapper">
+                                        <span class="currency-symbol">Rp</span>
+                                        <input type="number" class="input-harga" 
+                                            value="${harga}" 
+                                            onchange="updateItem(${index}, 'harga', this.value)">
                                     </div>
                                 </div>
                             </div>
@@ -188,9 +187,9 @@
                 }
             });
 
-            if (parsedData.length === 0) return alert("Format salah.");
+            if (parsedData.length === 0) return alert("Format salah. Pastikan copy dari Excel.");
 
-            document.getElementById('headerTotal').innerText = formatRupiah(total);
+            updateTotalDisplay(total);
             document.getElementById('itemCount').innerText = parsedData.length + " Item";
             
             // Switch View
@@ -201,26 +200,38 @@
             window.scrollTo(0,0);
         }
 
-        // Fungsi Update Data saat user mengetik
+        // Update data saat user mengedit Nama atau Harga
         function updateItem(index, field, value) {
             const item = parsedData.find(i => i.id === index);
             if (item) {
-                if (field === 'kode') item.kode = value.trim();
-                if (field === 'nama') item.nama = value.trim(); // Update nama yang akan dikirim
+                if (field === 'nama') {
+                    item.nama = value.trim();
+                }
+                if (field === 'harga') {
+                    const val = parseInt(value);
+                    if(!isNaN(val)) {
+                        item.harga = val;
+                        recalculateTotal(); // Hitung ulang total di atas
+                    }
+                }
             }
+        }
+
+        // Fungsi hitung ulang total jika harga diedit
+        function recalculateTotal() {
+            let total = 0;
+            parsedData.forEach(item => total += item.harga);
+            updateTotalDisplay(total);
+        }
+
+        function updateTotalDisplay(total) {
+            document.getElementById('headerTotal').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
         }
 
         function uploadData() {
             const url = document.getElementById('scriptUrl').value.trim();
             const sheet = document.getElementById('sheetName').value.trim();
             
-            // Validasi: Cek Kode Kosong
-            const emptyCodes = parsedData.filter(i => !i.kode);
-            if (emptyCodes.length > 0) {
-                alert(`Peringatan: ${emptyCodes.length} barang belum punya KODE (01, 02..). Mohon diisi dulu.`);
-                return;
-            }
-
             if(!url) return alert("URL Script belum diisi!");
 
             localStorage.setItem('myScriptUrl', url);
@@ -253,10 +264,6 @@
             document.getElementById('viewPreview').style.display = 'none';
             document.getElementById('btnProcess').style.display = 'block';
             document.getElementById('actionButtons').style.setProperty('display', 'none', 'important');
-        }
-
-        function formatRupiah(n) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
         }
     </script>
 </body>
